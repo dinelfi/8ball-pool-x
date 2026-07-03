@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Bot - Subscriber Bot</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+            padding: 30px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .switch-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .switch-group label {
+            margin-bottom: 0;
+            margin-right: 10px;
+            flex: 1;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #667eea;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .progress-section {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .progress-section.active {
+            display: block;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .status-text {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .stat-box {
+            background: white;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        button {
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-start {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            grid-column: 1 / -1;
+        }
+
+        .btn-start:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-start:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-stop {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .btn-stop:hover {
+            background: #ff5252;
+            transform: translateY(-2px);
+        }
+
+        .btn-reset {
+            background: #ffa500;
+            color: white;
+        }
+
+        .btn-reset:hover {
+            background: #ff8c00;
+            transform: translateY(-2px);
+        }
+
+        .log-section {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .log-section.active {
+            display: block;
+        }
+
+        .log-item {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+            font-family: 'Courier New', monospace;
+            word-break: break-word;
+        }
+
+        .log-item.success {
+            color: #4caf50;
+        }
+
+        .log-item.error {
+            color: #f44336;
+        }
+
+        .log-item.warning {
+            color: #ff9800;
+        }
+
+        .disclaimer {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #856404;
+        }
+
+        .disclaimer strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .button-group {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 YouTube Bot</h1>
+            <p>Aumenta suscriptores automáticamente</p>
+        </div>
+
+        <form id="botForm">
+            <!-- URL del Canal -->
+            <div class="form-group">
+                <label for="channelUrl">URL del Canal YouTube:</label>
+                <input 
+                    type="text" 
+                    id="channelUrl" 
+                    placeholder="https://www.youtube.com/channel/UCxxxxxx" 
+                    required
+                >
+            </div>
+
+            <!-- Máximo de Suscriptores -->
+            <div class="form-group">
+                <label for="maxSubs">Máximo de Suscriptores:</label>
+                <input 
+                    type="number" 
+                    id="maxSubs" 
+                    value="10" 
+                    min="1" 
+                    max="100"
+                    required
+                >
+            </div>
+
+            <!-- Delay -->
+            <div class="form-group">
+                <label for="delay">Delay entre suscripciones (ms):</label>
+                <input 
+                    type="number" 
+                    id="delay" 
+                    value="5000" 
+                    min="1000" 
+                    step="1000"
+                    required
+                >
+            </div>
+
+            <!-- Delay Aleatorio -->
+            <div class="switch-group">
+                <label>Delay Aleatorio (Evita detección):</label>
+                <label class="switch">
+                    <input type="checkbox" id="randomDelay" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <!-- Búsqueda de Canales -->
+            <div class="form-group">
+                <label for="searchKeyword">Buscar canales por palabra clave:</label>
+                <input 
+                    type="text" 
+                    id="searchKeyword" 
+                    placeholder="Ej: gaming, música, tecnología"
+                >
+                <small style="color: #999; display: block; margin-top: 5px;">
+                    Dejar vacío para suscribirse al canal ingresado
+                </small>
+            </div>
+
+            <!-- Proxy -->
+            <div class="switch-group">
+                <label>Usar Proxy (Recomendado):</label>
+                <label class="switch">
+                    <input type="checkbox" id="useProxy" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <!-- Dirección del Proxy -->
+            <div class="form-group" id="proxyGroup" style="display: block;">
+                <label for="proxyAddress">Dirección del Proxy:</label>
+                <input 
+                    type="text" 
+                    id="proxyAddress" 
+                    placeholder="proxy.com"
+                >
+            </div>
+
+            <!-- Puerto del Proxy -->
+            <div class="form-group" id="proxyPortGroup" style="display: block;">
+                <label for="proxyPort">Puerto del Proxy:</label>
+                <input 
+                    type="number" 
+                    id="proxyPort" 
+                    value="8080" 
+                    min="1" 
+                    max="65535"
+                >
+            </div>
+
+            <!-- Botones -->
+            <div class="button-group">
+                <button type="button" class="btn-start" id="startBtn" onclick="startBot()">
+                    ▶️ INICIAR BOT
+                </button>
+                <button type="button" class="btn-stop" id="stopBtn" onclick="stopBot()" style="display: none;">
+                    ⏹️ DETENER
+                </button>
+                <button type="button" class="btn-reset" id="resetBtn" onclick="resetForm()">
+                    🔄 LIMPIAR
+                </button>
+            </div>
+        </form>
+
+        <!-- Sección de Progreso -->
+        <div class="progress-section" id="progressSection">
+            <div class="status-text" id="statusText">Estado: Iniciando...</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="stat-value" id="successCount">0</div>
+                    <div class="stat-label">Exitosos</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="failedCount">0</div>
+                    <div class="stat-label">Fallidos</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="totalCount">0</div>
+                    <div class="stat-label">Total</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="timeCount">0s</div>
+                    <div class="stat-label">Tiempo</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección de Logs -->
+        <div class="log-section" id="logSection">
+            <div id="logContent"></div>
+        </div>
+
+        <!-- Disclaimer -->
+        <div class="disclaimer">
+            <strong>⚠️ ADVERTENCIA LEGAL:</strong>
+            Este bot viola los Términos de Servicio de YouTube. Usar esta herramienta puede resultar en la eliminación permanente de tu cuenta o canal. Úsalo bajo tu propio riesgo. No nos responsabilizamos por consecuencias.
+        </div>
+    </div>
+
+    <script>
+        let isRunning = false;
+        let startTime = null;
+        let successCount = 0;
+        let failedCount = 0;
+
+        const useProxyCheckbox = document.getElementById('useProxy');
+        const proxyGroup = document.getElementById('proxyGroup');
+        const proxyPortGroup = document.getElementById('proxyPortGroup');
+
+        useProxyCheckbox.addEventListener('change', function() {
+            proxyGroup.style.display = this.checked ? 'block' : 'none';
+            proxyPortGroup.style.display = this.checked ? 'block' : 'none';
+        });
+
+        function addLog(message, type = 'info') {
+            const logContent = document.getElementById('logContent');
+            const logItem = document.createElement('div');
+            logItem.className = `log-item ${type}`;
+            logItem.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logContent.appendChild(logItem);
+            logContent.scrollTop = logContent.scrollHeight;
+        }
+
+        function updateProgress(current, total) {
+            const percentage = (current / total) * 100;
+            document.getElementById('progressFill').style.width = percentage + '%';
+            document.getElementById('statusText').textContent = `Progreso: ${current}/${total}`;
+        }
+
+        function updateStats() {
+            document.getElementById('successCount').textContent = successCount;
+            document.getElementById('failedCount').textContent = failedCount;
+            document.getElementById('totalCount').textContent = successCount + failedCount;
+        }
+
+        function updateTime() {
+            if (startTime && isRunning) {
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                document.getElementById('timeCount').textContent = elapsed + 's';
+            }
+        }
+
+        async function simulateSubscribe(channelUrl) {
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    const success = Math.random() > 0.2; // 80% de éxito
+                    if (success) {
+                        successCount++;
+                        addLog(`✅ Suscripción exitosa a: ${channelUrl}`, 'success');
+                    } else {
+                        failedCount++;
+                        addLog(`❌ Error suscribiéndose a: ${channelUrl}`, 'error');
+                    }
+                    updateStats();
+                    resolve(success);
+                }, Math.random() * 2000 + 1000);
+            });
+        }
+
+        async function startBot() {
+            const channelUrl = document.getElementById('channelUrl').value.trim();
+            const maxSubs = parseInt(document.getElementById('maxSubs').value);
+            const delay = parseInt(document.getElementById('delay').value);
+            const randomDelay = document.getElementById('randomDelay').checked;
+            const useProxy = document.getElementById('useProxy').checked;
+
+            if (!channelUrl) {
+                alert('Por favor ingresa la URL del canal');
+                return;
+            }
+
+            isRunning = true;
+            startTime = Date.now();
+            successCount = 0;
+            failedCount = 0;
+
+            document.getElementById('progressSection').classList.add('active');
+            document.getElementById('logSection').classList.add('active');
+            document.getElementById('startBtn').style.display = 'none';
+            document.getElementById('stopBtn').style.display = 'block';
+            document.getElementById('logContent').innerHTML = '';
+
+            addLog('🤖 Bot iniciado', 'warning');
+            addLog(`📍 Canal: ${channelUrl}`, 'info');
+            addLog(`👥 Objetivo: ${maxSubs} suscriptores`, 'info');
+            addLog(`⏱️ Delay: ${delay}ms`, 'info');
+            addLog(`🔀 Delay Aleatorio: ${randomDelay ? 'Sí' : 'No'}`, 'info');
+            addLog(`🛡️ Proxy: ${useProxy ? 'Activado' : 'Desactivado'}`, 'info');
+
+            const timeInterval = setInterval(updateTime, 1000);
+
+            // Simular búsqueda de canales
+            addLog('🔍 Buscando canales relacionados...', 'warning');
+            await new Promise(r => setTimeout(r, 2000));
+
+            const channelsToSubscribe = [channelUrl];
+            for (let i = 1; i < maxSubs; i++) {
+                channelsToSubscribe.push(`https://www.youtube.com/channel/UC_Channel${i}`);
+            }
+
+            // Intentar suscribirse
+            for (let i = 0; i < channelsToSubscribe.length && isRunning; i++) {
+                const channel = channelsToSubscribe[i];
+                
+                await simulateSubscribe(channel);
+                updateProgress(i + 1, maxSubs);
+
+                if (i < channelsToSubscribe.length - 1 && isRunning) {
+                    const currentDelay = randomDelay ? 
+                        delay + Math.random() * delay : 
+                        delay;
+                    await new Promise(r => setTimeout(r, currentDelay));
+                }
+            }
+
+            if (isRunning) {
+                addLog(`✅ Bot completado. Suscriptores añadidos: ${successCount}`, 'success');
+            }
+
+            isRunning = false;
+            clearInterval(timeInterval);
+            document.getElementById('stopBtn').style.display = 'none';
+            document.getElementById('startBtn').style.display = 'block';
+        }
+
+        function stopBot() {
+            isRunning = false;
+            addLog('⏹️ Bot detenido por usuario', 'warning');
+            document.getElementById('stopBtn').style.display = 'none';
+            document.getElementById('startBtn').style.display = 'block';
+        }
+
+        function resetForm() {
+            document.getElementById('botForm').reset();
+            document.getElementById('progressSection').classList.remove('active');
+            document.getElementById('logSection').classList.remove('active');
+            document.getElementById('progressFill').style.width = '0%';
+            successCount = 0;
+            failedCount = 0;
+            updateStats();
+            document.getElementById('timeCount').textContent = '0s';
+            isRunning = false;
+        }
+    </script>
+</body>
+</html>
